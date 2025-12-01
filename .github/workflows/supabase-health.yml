@@ -24,9 +24,15 @@ jobs:
 
           echo "🔄 Starting Supabase health check at $(date -u +"%Y-%m-%dT%H:%M:%SZ")..."
           
+          # Helper function to check if HTTP code is 2xx (success)
+          is_success() {
+            local code=$1
+            [ "$code" -ge 200 ] && [ "$code" -lt 300 ]
+          }
+          
           # Test 1: Query users table (count check)
           echo "📊 Testing users table..."
-          USERS_RESPONSE=$(curl --fail --silent --show-error \
+          USERS_RESPONSE=$(curl --silent --show-error \
             "$SUPABASE_URL/rest/v1/users?select=id&limit=1" \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
@@ -35,15 +41,15 @@ jobs:
             -w "\n%{http_code}")
           
           USERS_HTTP_CODE=$(echo "$USERS_RESPONSE" | tail -n1)
-          if [ "$USERS_HTTP_CODE" != "200" ]; then
+          if ! is_success "$USERS_HTTP_CODE"; then
             echo "❌ Users table query failed with HTTP $USERS_HTTP_CODE"
             exit 1
           fi
-          echo "✅ Users table accessible"
+          echo "✅ Users table accessible (HTTP $USERS_HTTP_CODE)"
           
           # Test 2: Query decks table
           echo "📊 Testing decks table..."
-          DECKS_RESPONSE=$(curl --fail --silent --show-error \
+          DECKS_RESPONSE=$(curl --silent --show-error \
             "$SUPABASE_URL/rest/v1/decks?select=id,title&limit=1" \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
@@ -52,15 +58,15 @@ jobs:
             -w "\n%{http_code}")
           
           DECKS_HTTP_CODE=$(echo "$DECKS_RESPONSE" | tail -n1)
-          if [ "$DECKS_HTTP_CODE" != "200" ]; then
+          if ! is_success "$DECKS_HTTP_CODE"; then
             echo "❌ Decks table query failed with HTTP $DECKS_HTTP_CODE"
             exit 1
           fi
-          echo "✅ Decks table accessible"
+          echo "✅ Decks table accessible (HTTP $DECKS_HTTP_CODE)"
           
           # Test 3: Query flashcards table
           echo "📊 Testing flashcards table..."
-          FLASHCARDS_RESPONSE=$(curl --fail --silent --show-error \
+          FLASHCARDS_RESPONSE=$(curl --silent --show-error \
             "$SUPABASE_URL/rest/v1/flashcards?select=id&limit=1" \
             -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
             -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
@@ -69,11 +75,11 @@ jobs:
             -w "\n%{http_code}")
           
           FLASHCARDS_HTTP_CODE=$(echo "$FLASHCARDS_RESPONSE" | tail -n1)
-          if [ "$FLASHCARDS_HTTP_CODE" != "200" ]; then
+          if ! is_success "$FLASHCARDS_HTTP_CODE"; then
             echo "❌ Flashcards table query failed with HTTP $FLASHCARDS_HTTP_CODE"
             exit 1
           fi
-          echo "✅ Flashcards table accessible"
+          echo "✅ Flashcards table accessible (HTTP $FLASHCARDS_HTTP_CODE)"
           
           echo ""
           echo "✅ All health checks passed!"
