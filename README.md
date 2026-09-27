@@ -28,7 +28,7 @@ A modern, professional flashcard application built with Next.js, Supabase, and T
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/nocturnal625/Haroval
+git clone https://github.com/nocturnal629/Haroval
 cd Haroval
 yarn install
 ```
